@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flores Amarillas para Bea</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #fdfaf6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Georgia', serif;
+            overflow: hidden;
+            color: #333;
+        }
+        #contenedor {
+            display: flex;
+            flex-wrap: wrap-reverse;
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            align-items: center;
+        }
+        #texto {
+            flex: 1;
+            min-width: 300px;
+            padding: 40px;
+            opacity: 0;
+            transition: opacity 3s ease-in;
+            text-align: left;
+        }
+        #texto h1 {
+            color: #d4af37;
+            font-size: 20px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        #texto p {
+            font-size: 16px;
+            line-height: 1.8;
+            font-weight: bold;
+        }
+        #firma {
+            margin-top: 20px;
+            font-style: italic;
+            font-weight: normal;
+        }
+        #canvas-container {
+            flex: 1.5;
+            min-width: 300px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        canvas {
+            display: block;
+        }
+        @media (max-width: 768px) {
+            #texto { text-align: center; padding: 20px; position: absolute; top: 10%; z-index: 10; background: rgba(253, 250, 246, 0.8); border-radius: 10px; }
+            #canvas-container { align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="contenedor">
+    <div id="texto">
+        <h1>🌻 FELIZ DÍA DE LAS FLORES AMARILLAS, BEA 🌻</h1>
+        <p>CADA GIRASOL QUE VES<br>
+        AQUÍ ES UN LATIDO DE MI<br>
+        CORAZÓN.<br>
+        ASÍ COMO EL SOL ILUMINA<br>
+        LOS CAMPOS, TÚ ILUMINAS<br>
+        MI VIDA.<br>
+        QUE ESTAS FLORES TE<br>
+        RECUERDEN LO ESPECIAL<br>
+        QUE ERES PARA MÍ.</p>
+        <p id="firma">Eres el sol que hace florecer cada uno de mis días<br><br>- ¡TE AMO, BEA!</p>
+    </div>
+    <div id="canvas-container">
+        <canvas id="arbol"></canvas>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('arbol');
+    const ctx = canvas.getContext('2d');
+    
+    function redimensionar() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight * 0.8;
+    }
+    window.addEventListener('resize', redimensionar);
+    redimensionar();
+
+    let flores = [];
+    let yTallo = canvas.height;
+    let maxYTallo = canvas.height * 0.4;
+
+    function generarCorazon() {
+        for (let i = 0; i < Math.PI * 2; i += 0.05) {
+            let x = 16 * Math.pow(Math.sin(i), 3);
+            let y = -(13 * Math.cos(i) - 5 * Math.cos(2*i) - 2 * Math.cos(3*i) - Math.cos(4*i));
+            
+            x = x * 15 + canvas.width / 2;
+            y = y * 15 + maxYTallo;
+
+            for(let j = 0; j < 5; j++) {
+                flores.push({
+                    x: x + (Math.random() - 0.5) * 80,
+                    y: y + (Math.random() - 0.5) * 80,
+                    radio: 0,
+                    maxRadio: Math.random() * 4 + 5,
+                    retraso: Math.random() * 50
+                });
+            }
+        }
+    }
+
+    function dibujarTallo() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, canvas.height);
+        ctx.lineTo(canvas.width / 2, yTallo);
+        ctx.lineWidth = 12;
+        ctx.strokeStyle = '#2e8b57';
+        ctx.stroke();
+
+        if (yTallo > maxYTallo) {
+            yTallo -= 6;
+            requestAnimationFrame(dibujarTallo);
+        } else {
+            generarCorazon();
+            animarFlores();
+            setTimeout(() => {
+                document.getElementById('texto').style.opacity = 1;
+            }, 1500);
+        }
+    }
+
+    let fotograma = 0;
+    function animarFlores() {
+        fotograma++;
+        let dibujando = false;
+        
+        flores.forEach(flor => {
+            if (fotograma > flor.retraso && flor.radio < flor.maxRadio) {
+                flor.radio += 0.3;
+                dibujando = true;
+            }
+            
+            if (flor.radio > 0) {
+                ctx.beginPath();
+                ctx.arc(flor.x, flor.y, flor.radio, 0, Math.PI * 2);
+                ctx.fillStyle = '#FFD700';
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(flor.x, flor.y, flor.radio * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = '#3e2723';
+                ctx.fill();
+            }
+        });
+
+        if (dibujando || fotograma < 100) {
+            requestAnimationFrame(animarFlores);
+        }
+    }
+
+    setTimeout(dibujarTallo, 500);
+</script>
+</body>
+</html>
